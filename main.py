@@ -123,8 +123,6 @@ def miniMax(board, depth, alpha, beta, isMax, isWhite):
         return min_score 
     
 
-    if isMax: return maxi(depth) 
-    else: return mini(depth)
 
 def find_move(board, depth, isWhite = False):
     bestMove = None
