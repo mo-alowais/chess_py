@@ -1,6 +1,8 @@
 import chess
 import math
 import time
+from IPython.display import display, SVG
+# add endgame behavior esp for king
 def evaluate(board, isWhite = False) -> int: 
     
     piece_vals = {
@@ -77,12 +79,12 @@ def evaluate(board, isWhite = False) -> int:
         piece = board.piece_at(square)
 
         if piece:
-            
             value = piece_vals[piece.piece_type]
             valArr = piece_table[piece.piece_type]
             if not isWhite: 
                 if piece.color ==chess.BLACK:
                     score += value + valArr[square]
+
                     
                 else:
                     score -= value - valArr[::-1][square]
@@ -92,11 +94,14 @@ def evaluate(board, isWhite = False) -> int:
 
                 else:
                     score -= value - valArr[square]
+
     return score 
 
 def miniMax(board, depth, alpha, beta, isMax, isWhite):
-    if depth == 0 or board.is_game_over():
+    if board.is_checkmate(): return 100000
+    elif depth == 0 or board.is_game_over():
         return evaluate(board, isWhite)
+
 
     if isMax:
         max_score = -math.inf
@@ -145,29 +150,39 @@ if __name__=="__main__":
     print("Welcome to your demise! Type your move to play:")
 
     while not board.is_game_over():
-        print(board)
+        print(board._repr_svg_)
         myMove = None
         move = None
-        while move == None:
-            try:
-                myMove = input("Your move in UCI format: ")
-                move = chess.Move.from_uci(myMove)
-                while move not in board.legal_moves:
-                    print("illegal move, input again:")
-                    myMove = input()
-                    move = chess.Move.from_uci(myMove)
-            except:
-                print("Error")
+        # while move == None:
+        #     try:
+        #         myMove = input("Your move in UCI format: ")
+        #         move = chess.Move.from_uci(myMove)
+        #         while move not in board.legal_moves:
+        #             print("illegal move, input again:")
+        #             myMove = input()
+        #             move = chess.Move.from_uci(myMove)
+        #     except:
+        #         print("Error")
         
-        board.push(move)
-        ## code so bot plays against itself
-        # bot_move = find_move(board, 4, False)
-        # board.push(bot_move)
-        # time.sleep(1)
-
-
-        # bot plays with depth of 5
-        bot_move = find_move(board, 5, False)
+        # board.push(move)
+        # code so bot plays against itself
+        bot_move = find_move(board,3, True)
+        if bot_move == None:
+            breakpoint()
         board.push(bot_move)
-        print(bot_move)
+        if board.is_checkmate():
+            break
         # time.sleep(1)
+
+
+        # bot plays with depth of 4
+        bot_move = find_move(board,3, False)
+        if bot_move == None:
+            breakpoint()
+        board.push(bot_move)
+        # time.sleep(1)
+
+    print("Game over!", board.outcome())
+    final_svg = board._repr_svg_()
+    with open("chessboard.svg", "w") as f:
+        f.write(final_svg)
